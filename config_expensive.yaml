@@ -1,0 +1,693 @@
+meta:
+  engine: 4.1.0
+units:
+  kx: cx
+  ky: cy
+# U is a predefined unit of measure that means 19.05mm, which is MX spacing (u is 19.00mm)
+points:
+  key:
+    width: cx
+    height: cy
+    padding: cy
+  zones:
+    matrix:
+      anchor.shift: [80,-150] # Fix KiCad placement
+      columns:
+        pinky_ex:
+          key:
+            splay: 8
+            autobind: 0
+          rows:
+            num.bind: [2, 0, 0, 1]
+            top.bind: [0, 0, 0, 1]
+            home.bind: [0, 0, 2, 1]
+            bottom:
+              skip: true
+        pinky:
+          key:
+            splay: 
+            stagger: 0.5cx
+            bind: [0, 5, 0, 0]
+          rows:
+            bottom.bind: [0, .5kx, 2, 0]
+            top.bind: [0, 5, 0, 0]
+            num.bind: [2, 0, 0, 0.5cx]
+        ring:
+          key:
+            splay: -4
+            stagger: 0.4cx
+            autobind: 2
+            bind: [0, 10, 0, 3]
+          rows:
+            bottom.bind: [0, 0, .5ky, .5kx]
+            top.bind: [0, 5, 0, 0]
+            num.bind: [2, 0, 0, 0.5kx]
+        middle:
+          key:
+            stagger: 0.40cx
+            splay: -4
+            bind: [0, 0, 8, 5]
+          rows:
+            num.bind: [2, 0.5cx, 0, 0.5cx]
+        index:
+          key.stagger: -0.45cx
+          rows:
+            top.bind: [0, 0, 0, 5]
+            num.bind: [2, 0.5cx, 0, 0]
+        index_ex:
+          # key.stagger: -0.2cx
+          key.bind: [0, 0, 10, 0]
+          rows:
+            top.bind: [0, 0, 0, 5]
+      rows:
+        bottom:
+        home:
+        top:
+          bind: [0, 0, 0, 0]
+        num:
+          bind: [2, 0, 0, 0]
+
+    thumb:
+      anchor:
+        ref: matrix_index_bottom
+        shift: [0.2U, -1.1U]
+        rotate: -10
+      columns:
+        inny.key:
+          bind: [10, 1, 4, 1.5U]
+        tucky.key:
+          spread: cx
+          splay: -15
+          # stagger: 0.2cy
+          origin: [-0.5cx, -0.5cy]
+          bind: [9, 6, 4, 30]
+        reachy.key:
+          spread: cx
+          splay: -15
+          # stagger: 0.2cy
+          origin: [-0.5cx, -0.5cy]
+          bind: [4, 2, 4, 2]
+
+outlines:
+  _switch_cutouts:
+    - what: rectangle
+      where: true
+      size: 14 # Plate cutouts are 14mm * 14mm for both MX and Choc
+      bound: false
+  _inner:
+    - what: rectangle
+      where: [["/^matrix.*/", "/(bottom|home|top)/"]]
+      bound: true
+      size: [cx, cy]
+      fillet: 3
+  _num:
+    - what: rectangle
+      where: [["/^matrix.*/", "/num$/"]]
+      bound: true
+      size: [cx, .9cy]
+      fillet: 2
+  _mb:
+    - what: rectangle
+      where: &mb 
+        - "/top/"
+      adjust:
+        shift: [0, 0.5cy]
+        rotate: 90 
+      size: [0.2u, 9 * 0.75]
+  _vertical_mb: 
+    - what: rectangle
+      where: &vertical_mb [["/pinky_ex/", "/(top|home|bottom)/"]]
+      adjust:
+        shift: [0.5cx, 0]
+      size: [0.2u, 9 * 0.75]
+  _thumb:
+    - what: rectangle
+      where: "/^thumb.*/"
+      bound: true
+      fillet: 2
+      adjust:
+        shift: [0, 0]
+      size: [cx, 1.2cy]  
+  _trackpoint:
+    - what: circle
+      radius: 3
+      where: &trackpoint
+        aggregate.parts: 
+          - matrix_index_top
+          - matrix_index_ex_top
+          - matrix_index_home
+          - matrix_index_ex_home
+        rotate: 180
+  _mcu:
+    - what: rectangle
+      where: &mcu
+        # aggregate.parts: 
+        #   - matrix_ring_bottom
+        #   - matrix_middle_bottom
+        # shift: [0U, -1.4U]
+        ref: matrix_pinky_bottom
+        shift: [25, -21]
+        rotate: 90
+      size: [17.78, 33]
+      # bound: true
+      fillet: 2
+  _mcu_fix_outline:
+    - what: rectangle
+      where: 
+        ref: *mcu
+        shift: [2, -2]
+      size: [25, 38]
+      fillet: 2
+      
+  _gpio_expander_0:
+    - what: rectangle
+      where: &ge0 
+        ref: *mcu
+        shift: [15, 10]
+      size: 4
+  _gpio_expander_1:
+    - what: rectangle
+      where: &ge1
+        ref: *mcu
+        shift: [17, -14]
+        rotate: -90     
+      size: 4
+  _bat:
+    - what: rectangle
+      where: &bat
+        ref: matrix_index_ex_home
+        shift: [0.5cx + 10 + 3, 0]
+      # bound: true
+      size: [20, 50]
+  _thumb_extend:
+    - what: rectangle
+      where: &thumbextend
+        ref: *bat 
+        shift: [2.5,-37]
+      size: [1.4U, .6U]
+      fillet: 2
+      bound: true
+      # bound: true
+  _bat_connector:
+    - what: rectangle
+      size: [7.65, 6.5]
+      where: &batcon
+        ref: thumb_tucky
+        shift: [4, 14.5]
+        rotate: 180 
+
+  _bat_switch:
+    - what: rectangle
+      where: &batswitch
+        ref: thumb_inny
+        shift: [0, -.72ky]
+        rotate: -90
+      size: [3.8, 8]
+
+  # _mounting_hole: 
+  #   - what: circle
+  #     radius: 2
+  #     where:
+  #       - aggregate.parts:
+  #         - matrix_pinky_top
+  #         - matrix_ring_top
+  #       - aggregate.parts:
+  #         - matrix_middle_top
+  #         - matrix_ring_top
+  _mix:
+    [
+      +_inner,
+      +_num,
+      +_mb,
+      +_vertical_mb,
+      +_thumb,
+      +_gpio_expander_0,
+      +_gpio_expander_1,      
+      +_mcu,
+      +_mcu_fix_outline,
+      +_trackpoint,
+      +_thumb_extend,
+      # +_mounting_hole,
+    ]
+  __mix:
+    - what: outline
+      name: _mix
+      fillet: 3
+  mix:
+    - what: outline
+      name: __mix
+      fillet: 2
+  
+  mix_cutouts:
+    [
+      +mix,
+      ^_switch_cutouts,
+      ^_gpio_expander_0,
+      ^_gpio_expander_1,
+      ^_mcu,
+      ^_trackpoint,
+      ^_bat_switch,
+      ^_bat_connector,
+      ^_bat,
+      # ^_mounting_hole,
+    ]
+
+pcbs:
+  custom_split_b83c:
+    template: kicad8
+    outlines:
+      main:
+        outline: mix
+    footprints:
+      keys:
+        what: custom/switch_custom
+        where: [["/^matrix.*/", "/(bottom|home|top|num)/"], ["/^thumb.*/", "-/reachy/"]]
+        params:
+          from: GND
+          to: "{{name}}"
+          reversible: true
+          include_keycap: true
+          keycap_width: 17
+          keycap_height: 17
+      key_thumb_reachy:
+        $extends: pcbs.custom_split_b83c.footprints.keys
+        where: "/reachy/"
+        params:
+          keycap_height: 1.5U
+      ge0:
+        what: custom/gpio_expander
+        where: *ge0
+        params:
+          # reversible: true
+          P1_0 : 0_P1_0
+          P1_1 : matrix_middle_bottom
+          P1_2 : matrix_middle_home
+          P1_3 : matrix_middle_top
+          P0_0 : matrix_middle_num
+          P0_1 : matrix_ring_bottom
+          P0_2 : matrix_ring_home
+          P0_3 : matrix_ring_top
+          P0_4 : matrix_ring_num
+          P0_5 : matrix_pinky_num
+          P0_6 : matrix_pinky_top
+          P0_7 : matrix_pinky_ex_num
+          P1_4 : matrix_pinky_home
+          P1_5 : matrix_pinky_ex_top
+          P1_6 : matrix_pinky_bottom
+          P1_7 : matrix_pinky_ex_home
+
+          AD0 : 0_AD0
+          AD1 : 0_AD1
+          # TODO
+          SCL : SCL0
+          SDA : SDA0
+          INTN : INTN0
+          # TODO
+          RSTN : RSTN0
+
+      ge1:
+        what: custom/gpio_expander
+        where: *ge1
+        params:
+          # reversible: true
+          P1_0 : 1_P1_0
+          P1_1 : 1_P1_1
+          P1_2 : 1_P1_2
+          P1_3 : 1_P1_3
+          P0_0 : 1_P0_0
+          P0_1 : thumb_inny
+          P0_2 : thumb_reachy
+          P0_3 : thumb_tucky
+          P0_4 : matrix_index_ex_bottom
+          P0_5 : matrix_index_bottom
+          P0_6 : matrix_index_ex_top
+          P0_7 : matrix_index_ex_home
+          P1_4 : matrix_index_home
+          P1_5 : matrix_index_top
+          P1_6 : matrix_index_ex_num
+          P1_7 : matrix_index_num
+
+          AD0 : 1_AD0
+          AD1 : 1_AD1
+          # TODO
+          SCL : SCL1
+          SDA : SDA1
+          INTN : INTN1
+          # TODO
+          RSTN : RSTN1
+      re0_0:
+        what: custom/0603_r_array
+        where: *ge0
+        adjust:
+          orient: 90
+          shift: [-3.5, 2.3]
+        params:
+          P0_0: 0_P1_0 
+          P0_1: matrix_middle_bottom
+          P0_2: matrix_middle_home
+          P0_3: matrix_middle_top
+          P1_0: VCC
+          P1_1: VCC
+          P1_2: VCC
+          P1_3: VCC
+
+          side: 'B'
+          add_vias: 0b00001111 
+      re0_1:
+        $extends: pcbs.custom_split_b83c.footprints.re0_0
+        adjust:
+          orient: 90 + 45
+          shift: [-3, 0]
+        params:
+          P0_0: matrix_middle_num 
+          P0_1: matrix_ring_bottom
+          P0_2: matrix_ring_home
+          P0_3: matrix_ring_top
+      re0_2:
+        $extends: pcbs.custom_split_b83c.footprints.re0_0
+        adjust:
+          shift: [-4, -2.5]
+          orient: 180
+        params:
+          P0_0: matrix_ring_num 
+          P0_1: matrix_pinky_num 
+          P0_2: matrix_pinky_top 
+          P0_3: matrix_pinky_ex_num 
+      re0_3:
+        $extends: pcbs.custom_split_b83c.footprints.re0_0
+        adjust:
+          orient: 180 + 90
+          shift: [-3, 0]
+        params:
+          P0_0: matrix_pinky_home 
+          P0_1: matrix_pinky_ex_top 
+          P0_2: matrix_pinky_bottom 
+          P0_3: matrix_pinky_ex_home 
+      re1_0:
+        $extends: pcbs.custom_split_b83c.footprints.re0_0
+        where: *ge1
+        params:
+          P0_0: 1_P1_0 
+          P0_1: 1_P1_1
+          P0_2: 1_P1_2
+          P0_3: 1_P1_3
+      re1_1:
+        $extends: pcbs.custom_split_b83c.footprints.re0_1
+        where: *ge1
+        params:
+          P0_0: 1_P0_0
+          P0_1: thumb_inny
+          P0_2: thumb_reachy
+          P0_3: thumb_tucky
+      re1_2:
+        $extends: pcbs.custom_split_b83c.footprints.re0_2
+        where: *ge1
+        params:
+          P0_0: matrix_index_ex_bottom 
+          P0_1: matrix_index_bottom
+          P0_2: matrix_index_ex_top  
+          P0_3: matrix_index_ex_home
+      re1_3:
+        $extends: pcbs.custom_split_b83c.footprints.re0_3
+        where: *ge1
+        params:
+          P0_0: matrix_index_home 
+          P0_1: matrix_index_top 
+          P0_2: matrix_index_ex_num 
+          P0_3: matrix_index_num 
+      filter_pull_up_0:
+        what: custom/0402_smd
+        where: *ge0
+        adjust:
+          orient: 90 
+          shift: [0, 2.3]
+        params:
+          side: 'B'
+          P0_0: INTN0
+          P1_0: VCC
+      filter_charge_r_0:
+        $extends: pcbs.custom_split_b83c.footprints.filter_pull_up_0
+        adjust:
+          shift: [0, 3.3]
+        params:
+          P0_0: INTN0
+          P1_0: CAP0
+      filter_cap_0:
+        $extends: pcbs.custom_split_b83c.footprints.filter_pull_up_0
+        adjust:
+          shift: [0, 4.1]
+        params:
+          P0_0: GND
+          P1_0: CAP0
+      scl_pull_up_0:
+        $extends: pcbs.custom_split_b83c.footprints.filter_pull_up_0
+        adjust:
+          shift: [2.5, 2.3]
+        params:
+          P0_0: SCL0
+          P1_0: VCC
+      sda_pull_up_0:
+        $extends: pcbs.custom_split_b83c.footprints.filter_pull_up_0
+        adjust:
+          shift: [2.5, 3.1]
+        params:
+          P0_0: SDA0
+          P1_0: VCC
+      rstn_jumper_0:
+        what: custom/0402_jumper
+        where: *ge0
+        adjust:
+          rotate: 180
+          shift: [-3.5, -1.2]
+        params:
+          from: RSTN0
+          to: VCC
+      ad0_jumper_0:
+        what: custom/0402_jumper
+        where: *ge0
+        adjust:
+          rotate: 90
+          shift: [-2.2, 3.3]
+        params:
+          from: 0_AD0
+          to: GND
+      ad1_jumper_0:
+        what: custom/0402_jumper
+        where: *ge0
+        adjust:
+          rotate: 180
+          shift: [-3.5, -2.1]
+        params:
+          from: 0_AD1
+          to: GND
+      scl_pull_up_1:
+        $extends: pcbs.custom_split_b83c.footprints.scl_pull_up_0
+        where: *ge1
+        params:
+          P0_0: SCL1
+      sda_pull_up_1:
+        $extends: pcbs.custom_split_b83c.footprints.sda_pull_up_0
+        where: *ge1
+        params:
+          P0_0: SDA1
+      filter_pull_up_1:
+        $extends: pcbs.custom_split_b83c.footprints.filter_pull_up_0
+        where: *ge1
+        params:
+          P0_0: INTN1
+      filter_charge_r_1:
+        $extends: pcbs.custom_split_b83c.footprints.filter_charge_r_0
+        where: *ge1
+        params:
+          P0_0: INTN1
+          P0_1: CAP1
+      filter_cap_1:
+        $extends: pcbs.custom_split_b83c.footprints.filter_cap_0
+        where: *ge1
+        params:
+          P1_0: CAP1
+      rstn_jumper_1:
+        $extends: pcbs.custom_split_b83c.footprints.rstn_jumper_0
+        where: *ge1
+        params:
+          from: RSTN1
+      ad0_jumper_1:
+        $extends: pcbs.custom_split_b83c.footprints.ad0_jumper_0
+        where: *ge1
+        params:
+          from: 1_AD0
+      ad1_jumper_1:
+        $extends: pcbs.custom_split_b83c.footprints.ad1_jumper_0
+        where: *ge1
+        params:
+          from: 1_AD1
+          to: VCC
+      mb:
+        what: custom/mouse_bites
+        where: *mb
+        adjust:
+          shift: [0, 0.53cy]
+          rotate: 90
+        params:
+          include_traces: 3
+      vertical_mb:
+        what: custom/mouse_bites
+        where: *vertical_mb
+        adjust:
+          shift: [0.53cx, 0]
+        params:
+          include_traces: 3
+      trackpoint:
+        what: infused-kim/trackpoint_mount
+        where: *trackpoint
+        params:
+          show_board: true
+          show_outline_x240: true
+      bat_con: 
+        what: custom/bat_con_mx_1_25_1x02
+        where: *batcon
+        params:
+          reversible: true
+      bat_switch:
+        what: ceoloide/power_switch_smd_side
+        where: *batswitch
+        params:
+          reversible: true
+      mounting_hole_0:
+        what: ceoloide/mounting_hole_npth
+        where:
+          - aggregate.parts:
+            - matrix_pinky_top
+            - matrix_ring_top
+      mounting_hole_1:
+        what: ceoloide/mounting_hole_npth
+        where:
+          - aggregate.parts:
+            - matrix_ring_top
+            - matrix_middle_top
+      mounting_hole_2:
+        what: ceoloide/mounting_hole_npth
+        where:
+          - aggregate.parts:
+            - matrix_middle_top
+            - matrix_index_top
+      mounting_hole_3:
+        what: ceoloide/mounting_hole_npth
+        where:
+          - aggregate.parts:
+            - matrix_pinky_ex_num
+            - matrix_pinky_num
+        adjust.shift: [0, .3ky]
+      mounting_hole_4:
+        what: ceoloide/mounting_hole_npth
+        where:
+          - aggregate.parts:
+            - matrix_pinky_num
+            - matrix_ring_num
+        adjust.shift: [0, .3ky]
+      mounting_hole_5:
+        what: ceoloide/mounting_hole_npth
+        where:
+          - aggregate.parts:
+            - matrix_ring_num
+            - matrix_middle_num
+        adjust.shift: [0, .3ky]
+      mounting_hole_6:
+        what: ceoloide/mounting_hole_npth
+        where:
+          - aggregate.parts:
+            - matrix_middle_num
+            - matrix_index_num
+        adjust.shift: [0, .3ky]
+      mounting_hole_7:
+        what: ceoloide/mounting_hole_npth
+        where:
+          - aggregate.parts:
+            - matrix_index_num
+            - matrix_index_ex_num
+      mounting_hole_8:
+        what: ceoloide/mounting_hole_npth
+        where:
+          - aggregate.parts:
+            - matrix_pinky_ex_top
+            - matrix_pinky_ex_home
+        adjust.shift: [0, -.1ky]
+      mounting_hole_10:
+        what: ceoloide/mounting_hole_npth
+        where:
+          - aggregate.parts:
+            - matrix_index_ex_bottom
+            - matrix_index_ex_home
+        adjust.shift: [0, -.1ky]
+      mounting_hole_13:
+        what: ceoloide/mounting_hole_npth
+        where:
+          - aggregate.parts:
+            - matrix_pinky_bottom
+            - matrix_pinky_home
+        adjust.shift: [0, -.1ky]
+      mounting_hole_14:
+        what: ceoloide/mounting_hole_npth
+        where:
+          - aggregate.parts:
+            - matrix_middle_bottom
+            - matrix_middle_home
+        adjust.shift: [0, -.1ky]
+      mounting_hole_11:
+        what: ceoloide/mounting_hole_npth
+        where:
+          - aggregate.parts:
+            - matrix_index_ex_bottom
+            - thumb_inny
+            - thumb_tucky
+      mounting_hole_9:
+        what: ceoloide/mounting_hole_npth
+        where: *thumbextend
+        adjust:
+          shift: [8, 1]
+      mounting_hole_12:
+        what: ceoloide/mounting_hole_npth
+        where:
+          - aggregate.parts:
+            - thumb_inny
+            - thumb_inny
+            - *mcu
+        adjust.shift: [-1, 0]
+      # mounting_hole_13:
+      #   what: ceoloide/mounting_hole_npth
+      #   where:
+      #     - aggregate.parts:
+      #       - matrix_pinky_bottom
+      #       - *mcu
+        # adjust.shift: [-1, 0]
+      mcu:
+        what: ceoloide/mcu_nice_nano
+        # what: ceoloide/mcu_supermini_nrf52840 
+        where: *mcu
+        params:
+          reversible: true
+          # only_required_jumpers: true
+          P1: SCL0
+          P0: SDA0
+          P2: SCL1
+          P3: SDA1
+          P21: INTN0
+          P20: INTN1
+      logo:
+        what: custom/custom_logo
+        where: &logo
+          - aggregate.parts:
+              - *ge0
+              - *ge1
+            rotate: -45
+            shift: [4, 2]
+        params:
+          reversible: true
+
+      text:
+        what: ceoloide/utility_text
+        where: *logo
+        adjust.shift: [0, -7]
+        params:
+          reversible: true
+          text: "Designed by B83C"

@@ -1,0 +1,4 @@
+output/
+*.zip
+*.ekb
+node_modules/
